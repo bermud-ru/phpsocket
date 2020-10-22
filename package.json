@@ -1,0 +1,21 @@
+{
+  "repositories": [
+    {
+      "url": "git@github.com:bermud-ru/phpsocket.git",
+      "type": "git"
+    }
+  ],
+  "require": {
+    "bermud-ru/jsroll":"*@dev",
+    "bermud-ru/phproll":"*@dev"
+  },
+
+  "scripts": {
+    "post-install-cmd": [
+      "./vendor/bermud-ru/phpsocket/post-install"
+    ],
+    "post-update-cmd": [
+      "./vendor/bermud-ru/phpsocket/post-update"
+    ]
+  }
+}
