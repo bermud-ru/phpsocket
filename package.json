@@ -6,16 +6,19 @@
     }
   ],
   "require": {
-    "bermud-ru/jsroll":"*@dev",
     "bermud-ru/phproll":"*@dev"
   },
 
   "scripts": {
     "post-install-cmd": [
-      "./vendor/bermud-ru/phpsocket/post-install"
+      "sudo bash ./vendor/bermud-ru/phproll/post-install"
+    ],
+    "post-package-install": [
     ],
     "post-update-cmd": [
-      "./vendor/bermud-ru/phpsocket/post-update"
+      "sudo bash ./vendor/bermud-ru/phproll/post-update"
+    ],
+    "post-package-update": [
     ]
   }
 }
