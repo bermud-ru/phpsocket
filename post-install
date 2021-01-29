@@ -62,7 +62,6 @@ ln -s $serverRoot/etc/nginx/$PROJECT.wss.conf /etc/nginx/conf.d/$PROJECT.wss.con
 fi
 chown -h root:wheel /etc/nginx/conf.d/*
 restorecon -vF /etc/nginx/conf.d/*
-fi
 
 printf "WEB context resotre\n"
 chcon -R -t httpd_sys_content_t $serverRoot
