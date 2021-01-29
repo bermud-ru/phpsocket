@@ -13,6 +13,7 @@ fi
 
 ######## CONFIG ##########################################################################
 export vendor=vendor/bermud-ru/phproll
+export SSL_path=$(pwd)/etc/pki
 export serverRoot=$(pwd)
 export PROJECT=${PWD##*/}
 ##########################################################################################
@@ -52,4 +53,7 @@ server {
 }
 EOF
 
+printf "WEB context resotre\n"
+chcon -R -t httpd_sys_content_t $serverRoot
+semanage fcontext -a -t httpd_sys_content_t "${serverRoot}/(/.*)?"
 exit

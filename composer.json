@@ -64,24 +64,19 @@
     "ext-json": "*",
     "ext-pdo": "*",
     "ext-mbstring": "*",
-    "ext-opcache": "*",
-    "ext-fpm": "*",
-    "ext-process": "*",
-    "ext-cli": "*",
-    "ext-pgsql": "*",
-    "ext-devel": "*"
+    "ext-pgsql": "*"
   },
 
   "scripts": {
     "post-install-cmd": [
-      "mkdir -p public/js",
-      "./vendor/bermud-ru/jsroll/post-install",
-      "./vendor/bermud-ru/phproll/post-install"
+      "sudo bash ./vendor/bermud-ru/phproll/post-install"
+    ],
+    "post-package-install": [
     ],
     "post-update-cmd": [
-      "mkdir -p public/js",
-      "./vendor/bermud-ru/jsroll/post-update",
-      "./vendor/bermud-ru/phproll/post-update"
+      "sudo bash ./vendor/bermud-ru/phproll/post-update"
+    ],
+    "post-package-update": [
     ]
   },
 
