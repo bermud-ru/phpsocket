@@ -21,6 +21,11 @@ printf "Post-install scripting ...\n\n"
 
 printf "NGINX webSocket configuration\n"
 cat << EOF > ./etc/nginx/$PROJECT.wss.conf
+map $http_upgrade \$connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
 upstream appserver {
     server 127.0.0.1:8001; # appserver_ip:ws_port
 }
