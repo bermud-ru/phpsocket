@@ -31,7 +31,7 @@ upstream appserver {
 }
 server {
     # client_wss_port
-    listen 8000 ssl;
+    listen 8000 ssl http2;
     #ssl on;
     ssl_certificate     $SSL_path/nginx.crt;
     ssl_certificate_key $SSL_path/nginx.key;
