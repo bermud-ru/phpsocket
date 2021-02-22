@@ -13,9 +13,11 @@ fi
 
 ######## CONFIG ##########################################################################
 export vendor=vendor/bermud-ru/phproll
-export SSL_path=$(pwd)/etc/pki
 export serverRoot=$(pwd)
 export PROJECT=${PWD##*/}
+export DOMAIN=$(jq -r '.install.domain' ./composer.json)
+export ADDRESS=$(jq -r '.install.address' ./composer.json)
+export SSL_path=$(pwd)/etc/pki
 ##########################################################################################
 printf "Post-install scripting ...\n\n"
 
@@ -58,17 +60,25 @@ server {
 }
 EOF
 
+export SELinux=$(sestatus)
+export NGINX=$(which nginx)
+if [ ! -z "$NGINX" ]; then
 printf "NGINX configs context resotre\n"
 chown -R root:root $serverRoot/etc/nginx
-restorecon -vF $serverRoot/etc/nginx/*
-chcon -t httpd_config_t $serverRoot/etc/nginx/*
 if [ ! -f /etc/nginx/conf.d/${PROJECT}.wss.conf ]; then
 ln -s $serverRoot/etc/nginx/$PROJECT.wss.conf /etc/nginx/conf.d/$PROJECT.wss.conf
 fi
 chown -h root:wheel /etc/nginx/conf.d/*
+if [ ! -z "$SELinux" ]; then
+restorecon -vF $serverRoot/etc/nginx/*
+chcon -t httpd_config_t $serverRoot/etc/nginx/*
 restorecon -vF /etc/nginx/conf.d/*
+fi
+fi
 
 printf "WEB context resotre\n"
+if [ ! -z "$SELinux" ]; then
 chcon -R -t httpd_sys_content_t $serverRoot
 semanage fcontext -a -t httpd_sys_content_t "${serverRoot}/(/.*)?"
+fi
 exit

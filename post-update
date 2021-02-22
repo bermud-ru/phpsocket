@@ -15,6 +15,9 @@ fi
 export vendor=vendor/bermud-ru/phproll
 export serverRoot=$(pwd)
 export PROJECT=${PWD##*/}
+export DOMAIN=$(jq -r '.install.domain' ./composer.json)
+export ADDRESS=$(jq -r '.install.address' ./composer.json)
+export SSL_path=$(pwd)/etc/pki
 ##########################################################################################
 printf "Post-update scripting ...\n\n"
 
