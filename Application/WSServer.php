@@ -105,23 +105,27 @@ abstract class WSServer extends \Application\CLI
 
     public function start($thread)
     {
-        if (file_exists($this->unix_socket)) @unlink($this->unix_socket);
-        $this->service = stream_socket_server('unix://'.$this->unix_socket, $errorNumber, $error,STREAM_SERVER_BIND | STREAM_SERVER_LISTEN);
-        if ($this->service) stream_set_blocking($this->service, 0);
-//            if (!$this->service || $errorNumber || $error) return $this->stop();
+        try {
+            if (file_exists($this->unix_socket)) @unlink($this->unix_socket);
+            $this->service = stream_socket_server('unix://' . $this->unix_socket, $errorNumber, $error, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN);
+            if ($this->service) stream_set_blocking($this->service, 0);
+            else return $this->stop('unix://' . $this->unix_socket, $errorNumber, $error);
 
-        $url = ($this->ssl_mode ? 'tls:' : 'tcp:') . "//{$this->host}:{$this->port}";
-        $this->server = stream_socket_server($url, $errorNumber, $error, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $this->context);
-        if (!$this->server || $errorNumber || $error) return $this->stop();
-        if ($this->server) stream_set_blocking($this->server, 0);
+            $url = ($this->ssl_mode ? 'tls:' : 'tcp:') . "//{$this->host}:{$this->port}";
+            $this->server = @stream_socket_server($url, $errorNumber, $error, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $this->context);
+            if ($this->server) stream_set_blocking($this->server, 0);
+            else return $this->stop($url, $errorNumber, $error);
 
-        if (is_resource($this->server)) $this->read[] = $this->server;
-        if (is_resource($this->service)) $this->read[] = $this->service;
-
+            if (is_resource($this->server)) $this->read[] = $this->server;
+            if (is_resource($this->service)) $this->read[] = $this->service;
+        } catch (\Exception $e) {
+            printf($e->getMessage()); exit;
+        }
+        echo "done!" . PHP_EOL;
         return $this->fork($thread, self::FORK_EXCHANGE);
     }
 
-    public function stop()
+    public function stop($soket = null, int $errorNumber = 0, string $error = null)
     {
         $socket = new \Application\Socket();
         foreach ( array_merge($this->read, $this->write, $this->except) as $client ) {
@@ -132,6 +136,8 @@ abstract class WSServer extends \Application\CLI
             stream_socket_shutdown($this->service, STREAM_SHUT_RDWR);
             if (file_exists($this->unix_socket)) @unlink($this->unix_socket);
         }
+        if ($error) { echo("ERROR: Socket <{$soket}> " . $error."\n\n"); }
+        echo "stoped!" . PHP_EOL;
     }
 
     public function SIGTSTP()
@@ -154,19 +160,20 @@ abstract class WSServer extends \Application\CLI
             $thread = array_key_exists('thread', $this->args) ? $this->args['thread'] : 1;
             $cmd = "php $this->path/$this->file --host=$host --port=$port --thread=$thread > /dev/null &";
             exec($cmd);
-            echo "done!" . PHP_EOL;
-            exit;
+            if (array_key_exists('host', $this->args)) $this->host = $this->args['host'];
+            if (array_key_exists('port', $this->args)) $this->port = $this->args['port'];
+            if (array_key_exists('thread', $this->args)) $thread = intval($this->args['thread']);
+            $this->start($thread);
         } elseif (array_key_exists('stop', $this->args)) {
             $cmd = "pkill -HUP -f $this->path/$this->file";
             exec($cmd);
             echo "done!" . PHP_EOL;
-            exit;
+        } else {
+            echo "for START\n";
+            echo "php $this->path/$this->file --host=<host> --port=<port> --thread=<thread> start\n";
+            echo "for STOP\n";
+            echo "php $this->path/$this->file stop\n\n";
         }
-
-        if (array_key_exists('host', $this->args)) $this->host = $this->args['host'];
-        if (array_key_exists('port', $this->args)) $this->port = $this->args['port'];
-        if (array_key_exists('thread', $this->args)) $thread = intval($this->args['thread']);
-
-        $this->start($thread);
+        exit;
     }
 }
