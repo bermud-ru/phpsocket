@@ -187,7 +187,7 @@ class WebSocket extends \Application\Socket
      * @param bool $masked
      * @return string
      */
-    protected function hybi10Encode($payload, $type = 'text', $masked = true): string
+    protected function hybi10Encode($payload, $type = 'text', $masked = true): ?string
     {
         $frameHead = [];
         $frame = '';
