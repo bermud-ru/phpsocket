@@ -101,11 +101,10 @@ class WebSocket extends \Application\Socket
     {
         if (!is_resource($this->socket)) return null;
 
-        for ($written = 0; $written < strlen($string); $written += $fwrite) {
-            $fwrite = @fwrite($this->socket, substr($string, $written));
-            if ($fwrite === false) {
-                return $written;
-            }
+        for ($written = 0; $written < strlen($string); $written += $fwriten) {
+            $data = substr($string, $written);
+            $fwriten = fwrite($this->socket, $data, strlen($data));
+            if ($fwriten === false) { return $written; }
         }
         return $written;
     }

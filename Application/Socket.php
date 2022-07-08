@@ -21,17 +21,17 @@ class Socket implements \Application\ISocket
     private $index = null;
     protected $opt = false;
 
-    public function __construct(array $opt = [], &$socket = null) {
+    public function __construct(array $opt = [], $socket = null) {
         $this->opt = $opt;
         $this->socket = $socket;
-        if ($socket) $this->index = intval($socket);
+        if ($socket) $this->index = (int) $socket;
     }
 
     function __destruct() { $this->close(); }
 
     function __invoke($socket = null, string $class = null) {
         if (class_exists($class)) return new $class($this->opt, $socket);
-        if ($socket) { $this->socket = $socket; $this->index = intval($socket); }
+        if ($socket) { $this->socket = $socket; $this->index = (int) $socket; }
         return $this;
     }
 
@@ -73,17 +73,18 @@ class Socket implements \Application\ISocket
      */
     public function meta(): ?array
     {
-        return is_resource($this->socket) ? stream_get_meta_data($this->socket) : null;
+        return is_resource($this->socket) ? \stream_get_meta_data($this->socket) : null;
     }
 
     /**
-     * @param string $string
+     * @param string $data
      * @param array $opt
      * @return int|null
      */
-    public function write(string $string, array $opt = []): ?int
+    public function write(string $data, array $opt = []): ?int
     {
-        return is_resource($this->socket) ? @fwrite($this->socket, $string) : null;
+        return is_resource($this->socket) ? fwrite($this->socket, $data, strlen($data)) : null;
+//        return is_resource($this->socket) ? \socket_send($this->socket, $data, strlen($data), 0) : null;
     }
 
     /**
@@ -91,14 +92,15 @@ class Socket implements \Application\ISocket
      */
     public function read(): ?string
     {
-        return is_resource($this->socket) ? @fread($this->socket, self::SOCKET_BUFFER_SIZE) : null;
+        return is_resource($this->socket) ? fread($this->socket, self::SOCKET_BUFFER_SIZE) : null;
+//        return is_resource($this->socket) ? \socket_read($this->socket, self::SOCKET_BUFFER_SIZE, TCP_NODELAY) : null;
     }
 
     /**
      * @param $socket
      */
     public function close() {
-        if (is_resource($this->socket)) stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
+        if (is_resource($this->socket)) \stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
     }
 
 }

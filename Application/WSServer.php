@@ -111,6 +111,13 @@ abstract class WSServer extends \Application\CLI
             if ($this->service) stream_set_blocking($this->service, 0);
             else return $this->stop('unix://' . $this->unix_socket, $errorNumber, $error);
 
+//            $stream_context = stream_context_create(['ssl' => [
+//                'local_cert' => "path/to/cert.pem",
+//                'passphrase' => "password to cert",
+//                'allow_self_signed' => true,
+//                'verify_peer' => false
+//            ]]);
+//            $server = stream_socket_server("tlsv1.2://127.0.0.1:8001",$errno, $error, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $stream_context);
             $url = ($this->ssl_mode ? 'tls:' : 'tcp:') . "//{$this->host}:{$this->port}";
             $this->server = @stream_socket_server($url, $errorNumber, $error, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $this->context);
             if ($this->server) stream_set_blocking($this->server, 0);
@@ -121,23 +128,25 @@ abstract class WSServer extends \Application\CLI
         } catch (\Exception $e) {
             printf($e->getMessage()); exit;
         }
-        echo "done!" . PHP_EOL;
-        return $this->fork($thread, self::FORK_EXCHANGE);
+
+        echo "socked server started!" . PHP_EOL;
+        echo "Ctrl-C to quit." . PHP_EOL;
+
+        return $this->fork($thread, self::FORK_INFINITY);
     }
 
     public function stop($soket = null, int $errorNumber = 0, string $error = null)
     {
-        $socket = new \Application\Socket();
-        foreach ( array_merge($this->read, $this->write, $this->except) as $client ) {
-            if (is_resource($client)) $socket($client)->close();
-        }
+        $so = new \Application\Socket();
+        $all  =array_merge($this->read, $this->write, $this->except);
+        foreach ( $all as $client ) { if (is_resource($client)) $so($client)->close(); }
         if (is_resource($this->server)) stream_socket_shutdown($this->server, STREAM_SHUT_RDWR);
         if (is_resource($this->service)) {
             stream_socket_shutdown($this->service, STREAM_SHUT_RDWR);
             if (file_exists($this->unix_socket)) @unlink($this->unix_socket);
         }
         if ($error) { echo("ERROR: Socket <{$soket}> " . $error."\n\n"); }
-        echo "stoped!" . PHP_EOL;
+        echo "thread stoped!" . PHP_EOL;
     }
 
     public function SIGTSTP()
