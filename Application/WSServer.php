@@ -14,6 +14,7 @@ namespace Application;
 
 if (version_compare(PHP_VERSION, "5.3.0", '<')) { declare(ticks = 1); }
 
+#[\AllowDynamicProperties]
 abstract class WSServer extends \Application\CLI
 {
     const WEBSOCKET_RESPONSE_CODE = [

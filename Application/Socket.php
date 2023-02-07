@@ -12,6 +12,7 @@
  */
 namespace Application;
 
+#[\AllowDynamicProperties]
 class Socket implements \Application\ISocket
 {
     const SOCKET_BUFFER_SIZE = 4096;

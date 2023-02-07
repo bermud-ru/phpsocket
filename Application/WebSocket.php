@@ -12,6 +12,7 @@
  */
 namespace Application;
 
+#[\AllowDynamicProperties]
 class WebSocket extends \Application\Socket
 {
     const SOCKET_BUFFER_SIZE = 8192;
